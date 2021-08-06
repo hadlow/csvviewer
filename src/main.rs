@@ -11,15 +11,33 @@ async fn main()
         .version("0.1.0")
         .author("Billy Hadlow")
         .about("")
-        .arg(Arg::with_name("test")
-             .short("t")
-             .long("test")
-             .value_name("T")
-             .help("This is a test command")
-             .takes_value(true))
+        .arg(Arg::with_name("mode")
+             .help("Get/set")
+             .required(true)
+             .index(1))
+        .arg(Arg::with_name("key")
+             .help("Key name")
+             .required(true)
+             .index(2))
+        .arg(Arg::with_name("value")
+             .help("Key value")
+             .required(false)
+             .index(3))
         .get_matches();
 
-    let test = matches.value_of("test").unwrap_or("no test entered");
+    let mode = matches.value_of("mode").unwrap_or("No mode has been provided");
+    let key = matches.value_of("key").unwrap_or("No key has been provided");
+    let value = matches.value_of("value").unwrap_or("No value has been provided");
 
-    println!("Test is: {}", test);
+    let mut db = PickleDb::new("hypersquare.db", PickleDbDumpPolicy::AutoDump, SerializationMethod::Json);
+
+    println!(value);
+
+    if(value)
+    {
+        db.set(key, &100).unwrap();
+        println!("Successfull set key");
+    } else {
+        println!("The value is: {}", db.get::<i32>(key).unwrap());
+    }
 }
