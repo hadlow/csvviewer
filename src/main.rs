@@ -30,10 +30,9 @@ async fn main()
     let value = matches.value_of("value").unwrap_or("No value has been provided");
 
     let mut db = PickleDb::new("hypersquare.db", PickleDbDumpPolicy::AutoDump, SerializationMethod::Json);
+    let db2 = PickleDb::load("example.db", PickleDbDumpPolicy::DumpUponRequest, SerializationMethod::Json).unwrap();
 
-    println!(value);
-
-    if(value)
+    if(mode == "set")
     {
         db.set(key, &100).unwrap();
         println!("Successfull set key");
