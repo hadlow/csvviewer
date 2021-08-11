@@ -2,7 +2,8 @@ extern crate clap;
 
 use clap::{Arg, App};
 use tokio::{io::AsyncReadExt, net::TcpListener};
-use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
+
+mod db;
 
 #[tokio::main]
 async fn main()
@@ -29,14 +30,4 @@ async fn main()
     let key = matches.value_of("key").unwrap_or("No key has been provided");
     let value = matches.value_of("value").unwrap_or("No value has been provided");
 
-    let mut db = PickleDb::new("hypersquare.db", PickleDbDumpPolicy::AutoDump, SerializationMethod::Json);
-    let db2 = PickleDb::load("example.db", PickleDbDumpPolicy::DumpUponRequest, SerializationMethod::Json).unwrap();
-
-    if(mode == "set")
-    {
-        db.set(key, &100).unwrap();
-        println!("Successfull set key");
-    } else {
-        println!("The value is: {}", db.get::<i32>(key).unwrap());
-    }
 }
