@@ -3,7 +3,11 @@ extern crate clap;
 use clap::{Arg, App};
 use tokio::{io::AsyncReadExt, net::TcpListener};
 
-mod db;
+// A distributed key-value DB is made up of the following compontents:
+// - Networking
+// - Sharding
+// - Resharding
+// - Data storage
 
 #[tokio::main]
 async fn main()
@@ -12,22 +16,27 @@ async fn main()
         .version("0.1.0")
         .author("Billy Hadlow")
         .about("")
-        .arg(Arg::with_name("mode")
-             .help("Get/set")
+        .arg(Arg::with_name("shard")
+             .short("s")
+             .long("shard")
+             .help("The shard ID")
              .required(true)
-             .index(1))
-        .arg(Arg::with_name("key")
-             .help("Key name")
+             .takes_value(true))
+        .arg(Arg::with_name("port")
+             .short("p")
+             .long("port")
+             .help("Port to host the shard on")
              .required(true)
-             .index(2))
-        .arg(Arg::with_name("value")
+             .takes_value(true))
+        .arg(Arg::with_name("config")
+             .short("c")
+             .long("config")
              .help("Key value")
-             .required(false)
-             .index(3))
+             .required(true)
+             .takes_value(true))
         .get_matches();
 
-    let mode = matches.value_of("mode").unwrap_or("No mode has been provided");
-    let key = matches.value_of("key").unwrap_or("No key has been provided");
-    let value = matches.value_of("value").unwrap_or("No value has been provided");
-
+    let shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
+    let port = matches.value_of("port").unwrap_or("No port has been provided");
+    let config = matches.value_of("config").unwrap_or("No config file has been provided");
 }
