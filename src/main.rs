@@ -1,13 +1,7 @@
 extern crate clap;
 
 use clap::{Arg, App};
-use tokio::{io::AsyncReadExt, net::TcpListener};
-
-// A distributed key-value DB is made up of the following compontents:
-// - Networking
-// - Sharding
-// - Resharding
-// - Data storage
+use tokio::{io::AsyncReadExt, net::TcpListener, net::TcpStream};
 
 #[tokio::main]
 async fn main()
@@ -36,7 +30,18 @@ async fn main()
              .takes_value(true))
         .get_matches();
 
-    let shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
-    let port = matches.value_of("port").unwrap_or("No port has been provided");
-    let config = matches.value_of("config").unwrap_or("No config file has been provided");
+    let _shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
+    let _port = matches.value_of("port").unwrap_or("No port has been provided");
+    let _config = matches.value_of("config").unwrap_or("No config file has been provided");
+
+    let listener: TcpListener = TcpListener::bind("127.0.0.1:8081").await.unwrap();
+
+    loop
+    {
+        let (mut socket, mut address) = listener.accept().await.unwrap();
+
+        let mut buffer = [0u8; 1024];
+
+        socket.read(&mut buffer).await.unwrap();
+    }
 }
