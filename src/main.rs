@@ -1,6 +1,10 @@
 extern crate clap;
 
 use clap::{Arg, App};
+use std::convert::Infallible;
+use std::net::SocketAddr;
+use hyper::{Body, Request, Response, Server};
+use hyper::service::{make_service_fn, service_fn};
 /*
 use tokio::{
     io::AsyncBufReadExt,
@@ -11,6 +15,11 @@ use tokio::{
     net::TcpStream
 };
 */
+
+async fn hello_world(_req: Request<Body>) -> Result<Response<Body>, Infallible>
+{
+    Ok(Response::new("Hello, World".into()))
+}
 
 #[tokio::main]
 async fn main()
@@ -43,6 +52,19 @@ async fn main()
     let _port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
 
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8081));
+
+    let make_svc = make_service_fn(|_conn| async
+    {
+        Ok::<_, Infallible>(service_fn(hello_world))
+    });
+
+    let server = Server::bind(&addr).serve(make_svc);
+
+    if let Err(e) = server.await
+    {
+        eprintln!("server error: {}", e);
+    }
 
     /*
     let listener: TcpListener = TcpListener::bind("127.0.0.1:8081").await.unwrap();
