@@ -3,7 +3,7 @@ extern crate clap;
 use clap::{Arg, App};
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use hyper::{Body, Request, Response, Server};
+use hyper::{Body, Request, Response, Server, Method, StatusCode};
 use hyper::service::{make_service_fn, service_fn};
 /*
 use tokio::{
@@ -16,9 +16,23 @@ use tokio::{
 };
 */
 
-async fn hello_world(_req: Request<Body>) -> Result<Response<Body>, Infallible>
+async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
 {
-    Ok(Response::new("Hello, World".into()))
+    let mut response = Response::new(Body::empty());
+
+    match (req.method(), req.uri().path()) {
+        (&Method::GET, "/") => {
+            *response.body_mut() = Body::from("Try POSTing data to /echo");
+        },
+        (&Method::POST, "/echo") => {
+            // we'll be back
+        },
+        _ => {
+            *response.status_mut() = StatusCode::NOT_FOUND;
+        },
+    };
+
+    Ok(response)
 }
 
 #[tokio::main]
@@ -56,7 +70,7 @@ async fn main()
 
     let make_svc = make_service_fn(|_conn| async
     {
-        Ok::<_, Infallible>(service_fn(hello_world))
+        Ok::<_, Infallible>(service_fn(connect))
     });
 
     let server = Server::bind(&addr).serve(make_svc);
