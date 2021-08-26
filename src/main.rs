@@ -24,9 +24,6 @@ async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
         (&Method::GET, "/") => {
             *response.body_mut() = Body::from("Try POSTing data to /echo");
         },
-        (&Method::POST, "/echo") => {
-            // we'll be back
-        },
         _ => {
             *response.status_mut() = StatusCode::NOT_FOUND;
         },
