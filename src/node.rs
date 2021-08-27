@@ -7,6 +7,6 @@ impl Node
 {
     pub fn new()
     {
-
+        
     }
 }

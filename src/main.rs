@@ -51,12 +51,6 @@ async fn main()
              .help("Port to host the shard on")
              .required(true)
              .takes_value(true))
-        .arg(Arg::with_name("config")
-             .short("c")
-             .long("config")
-             .help("Key value")
-             .required(true)
-             .takes_value(true))
         .get_matches();
 
     let _shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
