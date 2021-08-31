@@ -35,7 +35,7 @@ async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
 #[tokio::main]
 async fn main()
 {
-    let matches = App::new("Hypersquare")
+    let matches = App::new("GenomDB")
         .version("0.1.0")
         .author("Billy Hadlow")
         .about("")
