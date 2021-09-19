@@ -54,10 +54,10 @@ async fn main()
         .get_matches();
 
     let _shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
-    let _port = matches.value_of("port").unwrap_or("No port has been provided");
+    let port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8081));
+    let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
 
     let make_svc = make_service_fn(|_conn| async
     {
