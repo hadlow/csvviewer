@@ -1,10 +1,12 @@
 extern crate clap;
 
-use clap::{Arg, App};
 use std::convert::Infallible;
 use std::net::SocketAddr;
+use std::env;
+
 use hyper::{Body, Request, Response, Server, Method, StatusCode};
 use hyper::service::{make_service_fn, service_fn};
+use clap::{Arg, App};
 /*
 use tokio::{
     io::AsyncBufReadExt,
@@ -15,6 +17,8 @@ use tokio::{
     net::TcpStream
 };
 */
+
+mod tokenizer;
 
 async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
 {
@@ -39,6 +43,12 @@ async fn main()
         .version("0.1.0")
         .author("Billy Hadlow")
         .about("")
+        .arg(Arg::with_name("file")
+             .short("f")
+             .long("file")
+             .help("FASTQ file")
+             .required(false)
+             .takes_value(true))
         .arg(Arg::with_name("shard")
              .short("s")
              .long("shard")
@@ -54,8 +64,12 @@ async fn main()
         .get_matches();
 
     let _shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
+    let file = matches.value_of("file").unwrap_or("No file name has been provided");
     let port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
+
+    let tkr = tokenizer::Tokenizer::new(file);
+    tkr.tokenize();
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
 

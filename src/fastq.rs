@@ -1,0 +1,9 @@
+struct Fastq
+{
+
+}
+
+impl Fastq
+{
+    
+}
