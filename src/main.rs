@@ -2,7 +2,6 @@ extern crate clap;
 
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use std::env;
 
 use hyper::{Body, Request, Response, Server, Method, StatusCode};
 use hyper::service::{make_service_fn, service_fn};
@@ -19,6 +18,7 @@ use tokio::{
 */
 
 mod tokenizer;
+mod fastq;
 
 async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
 {
@@ -34,6 +34,18 @@ async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
     };
 
     Ok(response)
+}
+
+fn get_tokenizer(file: &str) -> Box<dyn tokenizer::Tokenizer>
+{
+    let extension = Path::new(file.to_string()).extension().and_then(OsStr::to_str);
+
+    let tkr: dyn tokenizer::Tokenizer = match extension
+    {
+        Some("fastq") => fastq::Fastq::new(file),
+    }
+
+    Box<tkr>
 }
 
 #[tokio::main]
@@ -68,8 +80,7 @@ async fn main()
     let port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
 
-    let tkr = tokenizer::Tokenizer::new(file);
-    tkr.tokenize();
+    get_tokenizer(file);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
 
@@ -85,33 +96,34 @@ async fn main()
         eprintln!("server error: {}", e);
     }
 
-    /*
-    let listener: TcpListener = TcpListener::bind("127.0.0.1:8081").await.unwrap();
-
-    loop
-    {
-        let (mut socket, mut address) = listener.accept().await.unwrap();
-
-        tokio::spawn(async move
-        {
-            let (read, mut write) = socket.split();
-
-            let mut buffer = BufReader::new(read);
-            let mut line = String::new();
-
-            loop
-            {
-                let bytes_read = buffer.read_line(&mut line).await.unwrap();
-
-                if bytes_read == 0
-                {
-                    break;
-                }
-
-                write.write_all(line.as_bytes()).await.unwrap();
-                line.clear();
-            }
-        });
-    }
-    */
 }
+
+/*
+let listener: TcpListener = TcpListener::bind("127.0.0.1:8081").await.unwrap();
+
+loop
+{
+    let (mut socket, mut address) = listener.accept().await.unwrap();
+
+    tokio::spawn(async move
+    {
+        let (read, mut write) = socket.split();
+
+        let mut buffer = BufReader::new(read);
+        let mut line = String::new();
+
+        loop
+        {
+            let bytes_read = buffer.read_line(&mut line).await.unwrap();
+
+            if bytes_read == 0
+            {
+                break;
+            }
+
+            write.write_all(line.as_bytes()).await.unwrap();
+            line.clear();
+        }
+    });
+}
+*/
