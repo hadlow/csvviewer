@@ -1,3 +1,5 @@
+use std::fmt;
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::path::PathBuf;
@@ -28,5 +30,13 @@ impl Fastq
         }
 
         Ok(())
+    }
+}
+
+impl Debug for Fastq
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
+    {
+        write!(f, "{}", self.path.to_str().unwrap())
     }
 }

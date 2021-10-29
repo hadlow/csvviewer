@@ -37,13 +37,13 @@ async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
     Ok(response)
 }
 
+#[derive(Debug)]
 enum Tokenizer
 {
     Fastq(fastq::Fastq),
     Default(bool),
 }
 
-//fn get_tokenizer(file: &str) -> Tokenizer
 fn get_tokenizer(file: &str) -> Tokenizer
 {
     let file_path = PathBuf::from(&file.to_string());
@@ -88,7 +88,9 @@ async fn main()
     let port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
 
-    get_tokenizer(file);
+    let tokenizer = get_tokenizer(file);
+
+    println!("{:?}", get_tokenizer(file));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
 
