@@ -1,34 +1,25 @@
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
-
-use crate::tokenizer;
+use std::path::PathBuf;
 
 pub struct Fastq
 {
-    path: String,
-}
-
-impl tokenizer::Tokenizer for Fastq
-{
-    fn get_file_name(&self) -> String
-    {
-        self.path
-    }
+    path: PathBuf,
 }
 
 impl Fastq
 {
-    pub fn new(path: &String) -> Self
+    pub fn new(path: &PathBuf) -> Self
     {
         Self
         {
-            path: path,
+            path: PathBuf::from(path),
         }
     }
 
     pub fn tokenize(&self) -> io::Result<()>
     {
-        let file = File::open(self.filename.clone())?;
+        let file = File::open(self.path.to_str().unwrap())?;
         let reader = BufReader::new(file);
 
         for line in reader.lines()

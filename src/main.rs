@@ -2,6 +2,8 @@ extern crate clap;
 
 use std::convert::Infallible;
 use std::net::SocketAddr;
+use std::ffi::OsStr;
+use std::path::PathBuf;
 
 use hyper::{Body, Request, Response, Server, Method, StatusCode};
 use hyper::service::{make_service_fn, service_fn};
@@ -17,7 +19,6 @@ use tokio::{
 };
 */
 
-mod tokenizer;
 mod fastq;
 
 async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
@@ -36,16 +37,23 @@ async fn connect(req: Request<Body>) -> Result<Response<Body>, Infallible>
     Ok(response)
 }
 
-fn get_tokenizer(file: &str) -> Box<dyn tokenizer::Tokenizer>
+enum Tokenizer
 {
-    let extension = Path::new(file.to_string()).extension().and_then(OsStr::to_str);
+    Fastq(fastq::Fastq),
+    Default(bool),
+}
 
-    let tkr: dyn tokenizer::Tokenizer = match extension
+//fn get_tokenizer(file: &str) -> Tokenizer
+fn get_tokenizer(file: &str) -> Tokenizer
+{
+    let file_path = PathBuf::from(&file.to_string());
+    let extension = file_path.extension().and_then(OsStr::to_str);
+
+    match extension
     {
-        Some("fastq") => fastq::Fastq::new(file),
+        Some("fastq") => Tokenizer::Fastq(fastq::Fastq::new(&file_path)),
+        _ => Tokenizer::Default(false),
     }
-
-    Box<tkr>
 }
 
 #[tokio::main]
@@ -95,7 +103,6 @@ async fn main()
     {
         eprintln!("server error: {}", e);
     }
-
 }
 
 /*
