@@ -44,16 +44,21 @@ enum Tokenizer
     Default(bool),
 }
 
-fn get_tokenizer(file: &str) -> Tokenizer
+//fn get_tokenizer(file: &str) -> Tokenizer
+fn get_tokenizer(file: &str) -> fastq::Fastq
 {
     let file_path = PathBuf::from(&file.to_string());
     let extension = file_path.extension().and_then(OsStr::to_str);
 
+    fastq::Fastq::new(&file_path)
+
+    /*
     match extension
     {
         Some("fastq") => Tokenizer::Fastq(fastq::Fastq::new(&file_path)),
         _ => Tokenizer::Default(false),
     }
+    */
 }
 
 #[tokio::main]
@@ -90,7 +95,8 @@ async fn main()
 
     let tokenizer = get_tokenizer(file);
 
-    println!("{:?}", get_tokenizer(file));
+    println!("{:?}", tokenizer);
+    tokenizer.tokenize();
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
 

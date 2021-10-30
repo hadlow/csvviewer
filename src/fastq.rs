@@ -24,9 +24,15 @@ impl Fastq
         let file = File::open(self.path.to_str().unwrap())?;
         let reader = BufReader::new(file);
 
+        let mut last_type = 1;
+
         for line in reader.lines()
         {
-            println!("{}", line?);
+            match line
+            {
+                Ok(l) => println!("{}", l),
+                Err(e) => println!("{}", e),
+            }
         }
 
         Ok(())
