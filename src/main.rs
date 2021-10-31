@@ -93,9 +93,7 @@ async fn main()
     let port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
 
-    let tokenizer = get_tokenizer(file);
-
-    println!("{:?}", tokenizer);
+    let mut tokenizer = get_tokenizer(file);
     tokenizer.tokenize();
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
