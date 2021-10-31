@@ -24,14 +24,29 @@ impl Fastq
         let file = File::open(self.path.to_str().unwrap())?;
         let reader = BufReader::new(file);
 
-        let mut last_type = 1;
+        let mut read_buffer: Vec<String> = vec![String::new(); 4];
+        let mut current_read: usize = 0;
 
-        for line in reader.lines()
+        for wrapped_line in reader.lines()
         {
-            match line
+            let line = match wrapped_line
             {
-                Ok(l) => println!("{}", l),
-                Err(e) => println!("{}", e),
+                Ok(l) => l,
+                Err(e) => return Err(e),
+            };
+
+            if !line.is_empty()
+            {
+                read_buffer[current_read] = line;
+                current_read = current_read + 1;
+            }
+
+            if current_read == 4
+            {
+                println!("{}", read_buffer[0]);
+
+                read_buffer = vec![String::new(); 4];
+                current_read = 0;
             }
         }
 
