@@ -4,12 +4,13 @@ use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::path::PathBuf;
 
-const MAX_READ_BUFFER_SIZE: usize = 1024;
+const MAX_READ_BUFFER_SIZE: usize = 2;
+const NUM_SHARDS: usize = 4;
 
 pub struct Fastq
 {
     path: PathBuf,
-    read_buffer: Vec<Vec<String>>,
+    read_buffer: Vec<Vec<u8>>,
 }
 
 impl Fastq
@@ -19,7 +20,7 @@ impl Fastq
         Self
         {
             path: PathBuf::from(path),
-            read_buffer: vec![vec![String::new(); 0]],
+            read_buffer: vec![vec![0; 0]; 0],
         }
     }
 
@@ -53,23 +54,37 @@ impl Fastq
             }
         }
 
+        self.store_read(&current_read_buffer);
+
         Ok(())
     }
 
     fn store_read(&mut self, read: &Vec<String>)
     {
-        self.read_buffer.push(read.to_vec());
+        self.read_buffer.push(read.join("\n").as_bytes().to_vec());
 
-        if self.read_buffer.len() > MAX_READ_BUFFER_SIZE
+        if self.read_buffer.len() >= MAX_READ_BUFFER_SIZE
         {
-            self.store_read_buffer();
-            self.read_buffer = vec![vec![String::new(); 0]];
+            for line in self.read_buffer.iter()
+            {
+                println!("{:?}", line);
+            }
+            println!("---------------------------------------------------------------------");
+            self.write_read_buffer(&self.shard_read_buffer());
+            self.read_buffer = vec![vec![0; 0]; 0];
         }
     }
 
-    fn store_read_buffer(&self)
+    fn shard_read_buffer(&self) -> Vec<Vec<u8>>
     {
-        
+        let mut shards: Vec<Vec<u8>> = vec![vec![0; 0]; NUM_SHARDS];
+
+        vec![vec![0]]
+    }
+
+    fn write_read_buffer(&self, shards: &Vec<Vec<u8>>)
+    {
+
     }
 }
 
