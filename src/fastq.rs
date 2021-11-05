@@ -7,13 +7,14 @@ use std::path::PathBuf;
 use md5;
 
 const MAX_READ_BUFFER_SIZE: usize = 2;
-const NUM_SHARDS: usize = 4;
+const NUM_SHARDS: u128 = 4;
 
 pub struct Fastq
 {
     path: PathBuf,
     read_buffer: Vec<Vec<u8>>,
     key_buffer: Vec<Vec<u8>>,
+    shard_buffer: Vec<u128>,
 }
 
 impl Fastq
@@ -25,6 +26,7 @@ impl Fastq
             path: PathBuf::from(path),
             read_buffer: vec![vec![0; 0]; 0],
             key_buffer: vec![vec![0; 0]; 0],
+            shard_buffer: vec![0; 0],
         }
     }
 
@@ -69,19 +71,21 @@ impl Fastq
 
         self.read_buffer.push(read_as_bytes.clone());
         self.key_buffer.push(md5::compute(read_as_bytes.clone()).to_vec());
-        //println!("{:?}", read_as_bytes.clone());
-        //println!("{:?}", md5::compute(read_as_bytes));
+        self.shard_buffer.push(u128::from_be_bytes(md5::compute(read_as_bytes.clone()).0) % NUM_SHARDS);
+        println!("{:?}", read_as_bytes.clone());
+        println!("{:?}", md5::compute(read_as_bytes.clone()));
+        println!("{:?}", u128::from_be_bytes(md5::compute(read_as_bytes.clone()).0) % NUM_SHARDS);
 
         if self.read_buffer.len() >= MAX_READ_BUFFER_SIZE
         {
-            self.write_read_buffer(&self.shard_read_buffer());
+            //self.write_read_buffer(&self.shard_read_buffer());
             self.read_buffer = vec![vec![0; 0]; 0];
         }
     }
 
     fn shard_read_buffer(&self) -> Vec<Vec<u8>>
     {
-        let mut shards: Vec<Vec<u8>> = vec![vec![0; 0]; NUM_SHARDS];
+        //let mut shards: Vec<Vec<u8>> = vec![vec![0; 0]; NUM_SHARDS.try_into().unwrap()];
 
         // Loop through reads
         for read in self.read_buffer.iter()
