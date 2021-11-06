@@ -2,10 +2,9 @@ extern crate clap;
 
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use hyper::{Body, Request, Response, Server, Method, StatusCode};
+use hyper::{Body, Request, Response, Server, Method};
 use hyper::service::{make_service_fn, service_fn};
 use clap::{Arg, App};
 
@@ -19,6 +18,12 @@ async fn main()
         .version("0.1.0")
         .author("Billy Hadlow")
         .about("GenomDB")
+        .arg(Arg::with_name("config")
+             .short("c")
+             .long("config")
+             .help("Config file")
+             .required(false)
+             .takes_value(true))
         .arg(Arg::with_name("shard")
              .short("s")
              .long("shard")
@@ -33,7 +38,7 @@ async fn main()
              .takes_value(true))
         .get_matches();
 
-    let shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
+    let _shard = matches.value_of("shard").unwrap_or("No shard ID has been provided");
     let port = matches.value_of("port").unwrap_or("No port has been provided");
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
     let file = "test.fastq";
@@ -66,17 +71,19 @@ async fn serve(req: Request<Body>) -> Result<Response<Body>, Infallible>
     }
 }
 
+/*
 #[derive(Debug)]
 enum Tokenizer
 {
     Fastq(fastq::Fastq),
     Default(bool),
 }
+*/
 
 fn get_tokenizer(file: &str) -> fastq::Fastq
 {
     let file_path = PathBuf::from(&file.to_string());
-    let extension = file_path.extension().and_then(OsStr::to_str);
+    //let extension = file_path.extension().and_then(OsStr::to_str);
 
     fastq::Fastq::new(&file_path)
 
