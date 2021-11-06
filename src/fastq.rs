@@ -9,6 +9,13 @@ use md5;
 const MAX_READ_BUFFER_SIZE: usize = 2;
 const NUM_SHARDS: u128 = 4;
 
+struct Read
+{
+    key: Vec<u8>,
+    data: Vec<u8>,
+    shard: u128,
+}
+
 pub struct Fastq
 {
     path: PathBuf,
@@ -71,32 +78,21 @@ impl Fastq
 
         self.read_buffer.push(read_as_bytes.clone());
         self.key_buffer.push(md5::compute(read_as_bytes.clone()).to_vec());
-        self.shard_buffer.push(u128::from_be_bytes(md5::compute(read_as_bytes.clone()).0) % NUM_SHARDS);
-        println!("{:?}", read_as_bytes.clone());
-        println!("{:?}", md5::compute(read_as_bytes.clone()));
-        println!("{:?}", u128::from_be_bytes(md5::compute(read_as_bytes.clone()).0) % NUM_SHARDS);
+        self.shard_buffer.push(u128::from_be_bytes(md5::compute(read_as_bytes).0) % NUM_SHARDS);
 
+        // Once we've hit the buffer limit, broadcast reads to their nodes
         if self.read_buffer.len() >= MAX_READ_BUFFER_SIZE
         {
-            //self.write_read_buffer(&self.shard_read_buffer());
+            self.broadcast_read_buffer();
+
+            // Reset all buffers
             self.read_buffer = vec![vec![0; 0]; 0];
+            self.key_buffer = vec![vec![0; 0]; 0];
+            self.shard_buffer = vec![0; 0];
         }
     }
 
-    fn shard_read_buffer(&self) -> Vec<Vec<u8>>
-    {
-        //let mut shards: Vec<Vec<u8>> = vec![vec![0; 0]; NUM_SHARDS.try_into().unwrap()];
-
-        // Loop through reads
-        for read in self.read_buffer.iter()
-        {
-            // Hash em
-
-        }
-        vec![vec![0]]
-    }
-
-    fn write_read_buffer(&self, shards: &Vec<Vec<u8>>)
+    fn broadcast_read_buffer(&self)
     {
 
     }
