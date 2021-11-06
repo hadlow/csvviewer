@@ -9,13 +9,6 @@ use md5;
 const MAX_READ_BUFFER_SIZE: usize = 2;
 const NUM_SHARDS: u128 = 4;
 
-struct Read
-{
-    key: Vec<u8>,
-    data: Vec<u8>,
-    shard: u128,
-}
-
 pub struct Fastq
 {
     path: PathBuf,
