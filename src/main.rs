@@ -4,7 +4,7 @@ use std::convert::Infallible;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 
-use hyper::{Body, Request, Response, Server, Method};
+use hyper::{Server};
 use hyper::service::{make_service_fn, service_fn};
 use clap::{Arg, App};
 
@@ -50,7 +50,7 @@ async fn main()
 
     let make_svc = make_service_fn(|_conn| async
     {
-        Ok::<_, Infallible>(service_fn(serve))
+        Ok::<_, Infallible>(service_fn(api::routes))
     });
 
     let server = Server::bind(&addr).serve(make_svc);
@@ -58,16 +58,6 @@ async fn main()
     if let Err(e) = server.await
     {
         eprintln!("server error: {}", e);
-    }
-}
-
-async fn serve(req: Request<Body>) -> Result<Response<Body>, Infallible>
-{
-    match (req.method(), req.uri().path()) {
-        (&Method::GET, "/") => Ok(api::get()),
-        (&Method::POST, "/") => Ok(api::post()),
-        (&Method::DELETE, "/") => Ok(api::delete()),
-        _ => Ok(api::error()),
     }
 }
 
