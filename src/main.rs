@@ -2,7 +2,6 @@ extern crate clap;
 
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use std::path::PathBuf;
 
 use hyper::{Server};
 use hyper::service::{make_service_fn, service_fn};
@@ -10,6 +9,7 @@ use clap::{Arg, App};
 
 mod fastq;
 mod api;
+mod tokenizer;
 
 #[tokio::main]
 async fn main()
@@ -43,9 +43,6 @@ async fn main()
     let _config = matches.value_of("config").unwrap_or("No config file has been provided");
     let file = "test.fastq";
 
-    let mut tokenizer = get_tokenizer(file);
-    tokenizer.tokenize();
-
     let addr = SocketAddr::from(([127, 0, 0, 1], port.parse::<u16>().unwrap()));
 
     let make_svc = make_service_fn(|_conn| async
@@ -59,29 +56,4 @@ async fn main()
     {
         eprintln!("server error: {}", e);
     }
-}
-
-/*
-#[derive(Debug)]
-enum Tokenizer
-{
-    Fastq(fastq::Fastq),
-    Default(bool),
-}
-*/
-
-fn get_tokenizer(file: &str) -> fastq::Fastq
-{
-    let file_path = PathBuf::from(&file.to_string());
-    //let extension = file_path.extension().and_then(OsStr::to_str);
-
-    fastq::Fastq::new(&file_path)
-
-    /*
-    match extension
-    {
-        Some("fastq") => Tokenizer::Fastq(fastq::Fastq::new(&file_path)),
-        _ => Tokenizer::Default(false),
-    }
-    */
 }
