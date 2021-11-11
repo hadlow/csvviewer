@@ -1,5 +1,5 @@
 use hyper::{Body, Response, Method, Request, StatusCode};
-use futures::TryStreamExt as _;
+use futures::stream::{self, StreamExt, TryStreamExt};
 
 use crate::tokenizer;
 
@@ -31,16 +31,16 @@ pub fn post(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
         .into_body()
         .map_ok(|chunk| {
             println!("{:?}", chunk);
-            println!("----------");
-            chunk.iter()
-                .map(|byte| byte.to_ascii_uppercase())
-                .collect::<Vec<u8>>()
-        });
+            vec![49]
+    });
+
+    //Body::wrap_stream(mapping);
 
     //let mut tokenizer = tokenizer::get_tokenizer(file);
     //tokenizer.tokenize();
 
     let mut response = Response::new(Body::empty());
+    //*response.body_mut() = Body::from("POST");
     *response.body_mut() = Body::wrap_stream(mapping);
     *response.status_mut() = StatusCode::CREATED;
 
