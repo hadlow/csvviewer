@@ -11,12 +11,12 @@ enum Tokenizer
 }
 */
 
-pub fn get_tokenizer(file: &str) -> fastq::Fastq
+pub fn get_tokenizer() -> fastq::Fastq
 {
-    let file_path = PathBuf::from(&file.to_string());
+    //let file_path = PathBuf::from(&file.to_string());
     //let extension = file_path.extension().and_then(OsStr::to_str);
 
-    fastq::Fastq::new(&file_path)
+    fastq::Fastq::new()
 
     /*
     match extension

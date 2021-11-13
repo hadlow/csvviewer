@@ -5,7 +5,6 @@ use crate::tokenizer;
 
 pub async fn routes(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
 {
-    println!("Request coming in");
     match (request.method(), request.uri().path()) {
         (&Method::GET, "/") => get(request),
         (&Method::POST, "/") => post(request),
@@ -27,17 +26,21 @@ pub fn get(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
 // Uploading a new file
 pub fn post(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
 {
+    let mut tokenizer = tokenizer::get_tokenizer();
+
     let mapping = request
         .into_body()
         .map_ok(|chunk| {
-            println!("{:?}", chunk);
+            // Get vector of transactions to send to each node
+            let transactions = tokenizer.tokenize(&chunk);
+
+            for transaction in transactions
+            {
+                
+            }
+            
             vec![49]
     });
-
-    //Body::wrap_stream(mapping);
-
-    //let mut tokenizer = tokenizer::get_tokenizer(file);
-    //tokenizer.tokenize();
 
     let mut response = Response::new(Body::empty());
     //*response.body_mut() = Body::from("POST");
