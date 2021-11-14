@@ -5,7 +5,8 @@ use crate::tokenizer;
 
 pub async fn routes(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
 {
-    match (request.method(), request.uri().path()) {
+    match (request.method(), request.uri().path())
+    {
         (&Method::GET, "/") => get(request),
         (&Method::POST, "/") => post(request),
         (&Method::DELETE, "/") => delete(request),
@@ -30,7 +31,8 @@ pub fn post(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
 
     let mapping = request
         .into_body()
-        .map_ok(|chunk| {
+        .map_ok(move |chunk|
+        {
             // Get vector of transactions to send to each node
             let transactions = tokenizer.tokenize(&chunk);
 
@@ -40,7 +42,8 @@ pub fn post(request: Request<Body>) -> Result<Response<Body>, hyper::Error>
             }
             
             vec![49]
-    });
+        }
+    );
 
     let mut response = Response::new(Body::empty());
     //*response.body_mut() = Body::from("POST");
