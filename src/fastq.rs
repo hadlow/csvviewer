@@ -4,14 +4,14 @@ use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::path::PathBuf;
 
-use md5;
+use xxhash_rust::const_xxh3::xxh3_128;
 
 const NUM_SHARDS: u128 = 4;
 
 pub struct Fastq
 {
     read_buffer: Vec<Vec<u8>>,
-    key_buffer: Vec<Vec<u8>>,
+    key_buffer: Vec<u128>,
     shard_buffer: Vec<u128>,
 }
 
@@ -22,7 +22,7 @@ impl Fastq
         Self
         {
             read_buffer: vec![vec![0; 0]; 0],
-            key_buffer: vec![vec![0; 0]; 0],
+            key_buffer: vec![0; 0],
             shard_buffer: vec![0; 0],
         }
     }
@@ -77,7 +77,7 @@ impl Fastq
     fn store_read(&mut self, read: &Vec<u8>)
     {
         self.read_buffer.push(read.clone());
-        self.key_buffer.push(md5::compute(read.clone()).to_vec());
-        self.shard_buffer.push(u128::from_be_bytes(md5::compute(read).0) % NUM_SHARDS);
+        self.key_buffer.push(xxh3_128(read.clone()));
+        self.shard_buffer.push(u128::from_be_bytes(xxh3_128(read).0) % NUM_SHARDS);
     }
 }
